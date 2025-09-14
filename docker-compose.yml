@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  shape-detector:
+    build: .
+    container_name: shape_detector_system
+    ports:
+      - "5000:5000"
+    devices:
+      # USB Camera access
+      - /dev/video0:/dev/video0
+      # Arduino serial port (adjust if needed)
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    volumes:
+      - ./logs:/app/logs
+      - /dev/bus/usb:/dev/bus/usb
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+    privileged: true
+    restart: unless-stopped
+    networks:
+      - shape_net
+
+networks:
+  shape_net:
+    driver: bridge
