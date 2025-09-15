@@ -14,7 +14,7 @@ os.environ['QT_QPA_PLATFORM'] = 'xcb'
 # Flask app setup
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'shape_detector_secret_key'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', logger=True, engineio_logger=True)
 
 # Global state
 shape_counts = {"circle": 0, "square": 0, "triangle": 0}
@@ -251,12 +251,12 @@ def update_shape_count(shape):
         shape_counts[shape] += 1
         current_shape = shape
 
-        # Use socketio.start_background_task to emit from thread safely
-        def emit_updates():
+        # Direct emit - threading mode should handle this
+        try:
             socketio.emit('count_update', shape_counts)
             socketio.emit('shape_update', {'shape': shape})
-
-        socketio.start_background_task(emit_updates)
+        except Exception as e:
+            print(f"SocketIO emit error: {e}")
 
         print(f"Dashboard updated: {shape} count = {shape_counts[shape]}")
 
