@@ -251,9 +251,12 @@ def update_shape_count(shape):
         shape_counts[shape] += 1
         current_shape = shape
 
-        # Emit updates to dashboard with broadcast=True for thread safety
-        socketio.emit('count_update', shape_counts, broadcast=True)
-        socketio.emit('shape_update', {'shape': shape}, broadcast=True)
+        # Use socketio.start_background_task to emit from thread safely
+        def emit_updates():
+            socketio.emit('count_update', shape_counts)
+            socketio.emit('shape_update', {'shape': shape})
+
+        socketio.start_background_task(emit_updates)
 
         print(f"Dashboard updated: {shape} count = {shape_counts[shape]}")
 
@@ -450,8 +453,8 @@ def handle_reset_counts():
     stabilizer.reset()
 
     # Emit updates to all clients
-    socketio.emit('count_update', shape_counts, broadcast=True)
-    socketio.emit('shape_update', {'shape': 'none'}, broadcast=True)
+    socketio.emit('count_update', shape_counts)
+    socketio.emit('shape_update', {'shape': 'none'})
 
     print("🔄 Dashboard counts reset by user")
 
