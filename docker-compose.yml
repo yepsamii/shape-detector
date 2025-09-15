@@ -3,25 +3,19 @@ version: "3.8"
 services:
   shape-detector:
     build: .
-    container_name: shape_detector_system
-    ports:
-      - "5000:5000"
+    container_name: shape_detector_standalone
     devices:
       # USB Camera access
       - /dev/video0:/dev/video0
       # Arduino serial port (adjust if needed)
       - /dev/ttyUSB0:/dev/ttyUSB0
     volumes:
-      - ./logs:/app/logs
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/bus/usb:/dev/bus/usb
     environment:
       - PYTHONUNBUFFERED=1
-      - FLASK_ENV=production
+      - DISPLAY=${DISPLAY}
+      - QT_QPA_PLATFORM=xcb
     privileged: true
     restart: unless-stopped
-    networks:
-      - shape_net
-
-networks:
-  shape_net:
-    driver: bridge
+    network_mode: host
