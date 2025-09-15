@@ -3,7 +3,9 @@ version: "3.8"
 services:
   shape-detector:
     build: .
-    container_name: shape_detector_standalone
+    container_name: shape_detector_web
+    ports:
+      - "5000:5000"
     devices:
       # USB Camera access
       - /dev/video0:/dev/video0
@@ -18,4 +20,23 @@ services:
       - QT_QPA_PLATFORM=xcb
     privileged: true
     restart: unless-stopped
+    command: python shape_detector_web.py
+
+  # Optional: standalone OpenCV window version
+  shape-detector-standalone:
+    build: .
+    container_name: shape_detector_standalone
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/bus/usb:/dev/bus/usb
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISPLAY=${DISPLAY}
+      - QT_QPA_PLATFORM=xcb
+    privileged: true
     network_mode: host
+    command: python shape_detector.py
+    profiles: ["standalone"]

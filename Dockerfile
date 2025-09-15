@@ -35,6 +35,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY shape_detector.py .
+COPY shape_detector_web.py .
+COPY templates/ ./templates/
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -42,5 +44,8 @@ ENV OPENCV_VIDEOIO_PRIORITY_V4L2=1
 ENV QT_QPA_PLATFORM=xcb
 ENV DISPLAY=:0
 
-# Run the application
-CMD ["python", "shape_detector.py"]
+# Expose port for web dashboard
+EXPOSE 5000
+
+# Run the web application by default
+CMD ["python", "shape_detector_web.py"]
